@@ -252,6 +252,12 @@ Its purpose is simple:
 
 \---
 
+\## License
+
+
+
+VyCapture is open source software licensed under the \[MIT License](LICENSE).
+
 
 
 \## Brand
