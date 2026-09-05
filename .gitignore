@@ -361,3 +361,25 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+# ============================================================
+# VyCapture - Local User Data
+# Never commit local SQLite databases or user content.
+# ============================================================
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ============================================================
+# VyCapture - Local Release / Publish Artifacts
+# Release binaries should not be committed into source control.
+# ============================================================
+publish/
+Publish/
+*.zip
+*.7z
+*.rar
+*.pdb
