@@ -254,16 +254,17 @@ Its purpose is simple:
 
 \## License
 
-
-
 VyCapture is open source software licensed under the \[MIT License](LICENSE).
 
 
+## Privacy
+
+VyCapture is designed as a local-first application.
+
+See the [Privacy Policy](PRIVACY.md) for details.
+
 
 \## Brand
-
-
-
 VyCapture is a Viadivy project.
 
 
