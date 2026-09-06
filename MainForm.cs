@@ -4,6 +4,8 @@ using Viadivy.Tools.VyCapture.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Viadivy.Tools.VyCapture
@@ -21,6 +23,8 @@ namespace Viadivy.Tools.VyCapture
         private readonly TextBox _txtPreview =
     new TextBox();
 
+        private readonly GroupBox _previewGroup =
+    new GroupBox();
 
         private List<CaptureItem> _allCaptures =
     new List<CaptureItem>();
@@ -31,6 +35,12 @@ namespace Viadivy.Tools.VyCapture
         private readonly Button _btnSave =
             new Button();
 
+        private readonly Button _btnSaveTxt =
+    new Button();
+
+        private readonly Button _btnPaste =
+    new Button();
+
         private readonly Button _btnDelete =
     new Button();
 
@@ -40,6 +50,9 @@ namespace Viadivy.Tools.VyCapture
         private readonly Button _btnCopy =
     new Button();
 
+
+
+
         public MainForm(
             CaptureRepository repository)
         {
@@ -47,17 +60,33 @@ namespace Viadivy.Tools.VyCapture
                 repository;
 
 
-            Text =
-                "VyCapture";
+            Version? version =
+     typeof(MainForm)
+         .Assembly
+         .GetName()
+         .Version;
+
+
+            if (version != null)
+            {
+                Text =
+                    "VyCapture " +
+                    version.Major.ToString() +
+                    "." +
+                    version.Minor.ToString() +
+                    "." +
+                    version.Build.ToString();
+            }
+            else
+            {
+                Text =
+                    "VyCapture";
+            }
 
             StartPosition =
                 FormStartPosition.CenterScreen;
 
-            Width =
-                900;
-
-            Height =
-                700;
+            SetInitialWindowSize();
 
             MinimumSize =
                 new Size(
@@ -86,6 +115,12 @@ namespace Viadivy.Tools.VyCapture
             _btnCopy.Click +=
                 Copy_Click;
 
+            _btnSaveTxt.Click +=
+    SaveTxt_Click;
+
+            _btnPaste.Click +=
+    Paste_Click;
+
             _btnDelete.Click +=
                 Delete_Click;
 
@@ -104,6 +139,45 @@ namespace Viadivy.Tools.VyCapture
                 GridResults_SelectionChanged;
         }
 
+        private void SetInitialWindowSize()
+        {
+            Screen? screen =
+                Screen.PrimaryScreen;
+
+
+            if (screen == null)
+            {
+                Width =
+                    900;
+
+                Height =
+                    700;
+
+                return;
+            }
+
+
+            Rectangle workingArea =
+                screen.WorkingArea;
+
+
+            int targetWidth =
+                workingArea.Width * 75 / 100;
+
+            int targetHeight =
+                workingArea.Height * 80 / 100;
+
+
+            Width =
+                Math.Min(
+                    targetWidth,
+                    1100);
+
+            Height =
+                Math.Min(
+                    targetHeight,
+                    800);
+        }
 
         private void Delete_Click(
     object? sender,
@@ -139,8 +213,8 @@ namespace Viadivy.Tools.VyCapture
             DialogResult result =
                 MessageBox.Show(
                     this,
-                    "確定要刪除這筆資料嗎？\r\n\r\n" +
-                    "刪除後無法復原。",
+                    "Are you sure you want to delete this capture？\r\n\r\n" +
+                    "This action cannot be undone.",
                     "Delete Capture",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning,
@@ -171,7 +245,7 @@ namespace Viadivy.Tools.VyCapture
                 {
                     MessageBox.Show(
                         this,
-                        "找不到要刪除的資料。",
+                        "The selected capture could not be found.",
                         "VyCapture",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -202,7 +276,7 @@ namespace Viadivy.Tools.VyCapture
 
                 MessageBox.Show(
                     this,
-                    "資料未能刪除，請重新嘗試。",
+                    "Unable to delete the capture. Please try again.",
                     "VyCapture",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -251,14 +325,54 @@ namespace Viadivy.Tools.VyCapture
             _btnSave.Anchor =
                 AnchorStyles.Right;
 
+            _btnSave.Text =
+     "Save  (Ctrl+Enter)";
+
+            _btnSave.Width =
+                155;
+
+            _btnSave.Height =
+                30;
+
+
+            _btnPaste.Text =
+                "Paste";
+
+            _btnPaste.Width =
+                100;
+
+            _btnPaste.Height =
+                30;
+
+
+            FlowLayoutPanel buttonPanel =
+                new FlowLayoutPanel();
+
+            buttonPanel.Dock =
+                DockStyle.Fill;
+
+            buttonPanel.FlowDirection =
+                FlowDirection.RightToLeft;
+
+            buttonPanel.WrapContents =
+                false;
+
+
+            buttonPanel.Controls.Add(
+                _btnSave);
+
+            buttonPanel.Controls.Add(
+                _btnPaste);
+
+
 
             captureLayout.Controls.Add(
-                _txtCapture,
-                0,
-                0);
+         _txtCapture,
+         0,
+         0);
 
             captureLayout.Controls.Add(
-                _btnSave,
+                buttonPanel,
                 0,
                 1);
 
@@ -266,6 +380,47 @@ namespace Viadivy.Tools.VyCapture
             return captureLayout;
         }
 
+        private void Paste_Click(
+    object? sender,
+    EventArgs e)
+        {
+            try
+            {
+                if (!Clipboard.ContainsText())
+                {
+                    _statusLabel.Text =
+                        "Clipboard is empty";
+
+                    return;
+                }
+
+
+                _txtCapture.Paste();
+
+                _txtCapture.Focus();
+
+
+                _statusLabel.Text =
+                    "Pasted";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    ex.ToString());
+
+
+                MessageBox.Show(
+                    this,
+                    "Unable to paste text from the clipboard.",
+                    "VyCapture",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+
+                _statusLabel.Text =
+                    "Paste failed";
+            }
+        }
 
         private void Copy_Click(
     object? sender,
@@ -302,7 +457,7 @@ namespace Viadivy.Tools.VyCapture
 
                 MessageBox.Show(
                     this,
-                    "文字無法複製到剪貼簿。",
+                    "Unable to copy the text to the clipboard.",
                     "VyCapture",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -362,6 +517,14 @@ namespace Viadivy.Tools.VyCapture
             _btnCopy.Height =
                 30;
 
+            _btnSaveTxt.Text =
+    "Save TXT";
+
+            _btnSaveTxt.Width =
+                100;
+
+            _btnSaveTxt.Height =
+                30;
 
             _btnDelete.Text =
                 "Delete";
@@ -375,6 +538,9 @@ namespace Viadivy.Tools.VyCapture
 
             buttonPanel.Controls.Add(
                 _btnCopy);
+
+            buttonPanel.Controls.Add(
+    _btnSaveTxt);
 
             buttonPanel.Controls.Add(
                 _btnDelete);
@@ -396,7 +562,77 @@ namespace Viadivy.Tools.VyCapture
 
 
 
+        private void SaveTxt_Click(
+    object? sender,
+    EventArgs e)
+        {
+            string content =
+                _txtPreview.Text;
 
+
+            if (string.IsNullOrWhiteSpace(
+                    content))
+            {
+                _statusLabel.Text =
+                    "Nothing to save";
+
+                return;
+            }
+
+
+            try
+            {
+                string desktopPath =
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.DesktopDirectory);
+
+
+                string fileName =
+                    "VyCapture_" +
+                    DateTime.Now.ToString(
+                        "yyyyMMdd_HHmmss") +
+                    ".txt";
+
+
+                string filePath =
+                    Path.Combine(
+                        desktopPath,
+                        fileName);
+
+
+                UTF8Encoding utf8Encoding =
+                    new UTF8Encoding(
+                        false);
+
+
+                File.WriteAllText(
+                    filePath,
+                    content,
+                    utf8Encoding);
+
+
+                _statusLabel.Text =
+                    "Saved to Desktop | " +
+                    fileName;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    ex.ToString());
+
+
+                MessageBox.Show(
+                    this,
+                    "文字無法儲存到桌面。",
+                    "VyCapture",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+
+                _statusLabel.Text =
+                    "Save TXT failed";
+            }
+        }
 
 
 
@@ -415,6 +651,9 @@ namespace Viadivy.Tools.VyCapture
             {
                 _txtPreview.Clear();
 
+                _previewGroup.Text =
+                    "Preview";
+
                 return;
             }
 
@@ -432,12 +671,21 @@ namespace Viadivy.Tools.VyCapture
             {
                 _txtPreview.Clear();
 
+                _previewGroup.Text =
+                    "Preview";
+
                 return;
             }
 
 
             _txtPreview.Text =
                 item.Content;
+
+
+            _previewGroup.Text =
+                "Preview (" +
+                item.Content.Length.ToString("N0") +
+                " chars)";
         }
 
         private void GridResults_CellFormatting(
@@ -853,27 +1101,24 @@ namespace Viadivy.Tools.VyCapture
                 BuildPreviewPanel();
 
 
-            GroupBox previewGroup =
-                new GroupBox();
+            _previewGroup.Text =
+        "Preview";
 
-            previewGroup.Text =
-                "Preview";
-
-            previewGroup.Dock =
+            _previewGroup.Dock =
                 DockStyle.Fill;
 
-            previewGroup.Padding =
+            _previewGroup.Padding =
                 new Padding(
                     8);
 
-            previewGroup.Margin =
+            _previewGroup.Margin =
                 new Padding(
                     0,
                     4,
                     0,
                     4);
 
-            previewGroup.Controls.Add(
+            _previewGroup.Controls.Add(
                 previewPanel);
 
 
@@ -943,9 +1188,9 @@ namespace Viadivy.Tools.VyCapture
                 1);
 
             mainLayout.Controls.Add(
-                previewGroup,
-                0,
-                2);
+     _previewGroup,
+     0,
+     2);
 
             mainLayout.Controls.Add(
                 captureGroup,
@@ -1057,7 +1302,7 @@ namespace Viadivy.Tools.VyCapture
 
                 MessageBox.Show(
                     this,
-                    "資料未能儲存，請重新嘗試。",
+                    "Unable to save the capture. Please try again.",
                     "VyCapture",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -1090,7 +1335,7 @@ namespace Viadivy.Tools.VyCapture
 
                 MessageBox.Show(
                     this,
-                    "無法載入已儲存的資料。",
+                    "Unable to load saved captures.",
                     "VyCapture",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
