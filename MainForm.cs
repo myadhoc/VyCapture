@@ -127,6 +127,9 @@ namespace Viadivy.Tools.VyCapture
             _txtCapture.KeyDown +=
                 Capture_KeyDown;
 
+            _txtCapture.TextChanged +=
+    Capture_TextChanged;
+
             _txtSearch.TextChanged +=
     Search_TextChanged;
 
@@ -313,14 +316,7 @@ namespace Viadivy.Tools.VyCapture
                     42));
 
 
-            _btnSave.Text =
-     "Save  (Ctrl+Enter)";
-
-            _btnSave.Width =
-       155;
-
-            _btnSave.Height =
-                30;
+         
 
             _btnSave.Anchor =
                 AnchorStyles.Right;
@@ -333,6 +329,9 @@ namespace Viadivy.Tools.VyCapture
 
             _btnSave.Height =
                 30;
+
+            _btnSave.Enabled =
+    false;
 
 
             _btnPaste.Text =
@@ -1254,6 +1253,16 @@ namespace Viadivy.Tools.VyCapture
                 e.Handled =
                     true;
             }
+        }
+
+
+        private void Capture_TextChanged(
+    object? sender,
+    EventArgs e)
+        {
+            _btnSave.Enabled =
+                !string.IsNullOrWhiteSpace(
+                    _txtCapture.Text);
         }
 
 
