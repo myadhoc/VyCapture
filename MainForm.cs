@@ -102,6 +102,8 @@ namespace Viadivy.Tools.VyCapture
 
             BuildUi();
 
+            BuildMenuStrip();
+
             BuildStatusBar();
 
             LoadCaptures();
@@ -141,6 +143,132 @@ namespace Viadivy.Tools.VyCapture
             _gridResults.SelectionChanged +=
                 GridResults_SelectionChanged;
         }
+
+
+        private void BuildMenuStrip()
+        {
+            MenuStrip menuStrip =
+                new MenuStrip();
+
+            menuStrip.Dock =
+                DockStyle.Top;
+
+
+            ToolStripMenuItem fileMenuItem =
+                new ToolStripMenuItem();
+
+            fileMenuItem.Text =
+                "File";
+
+
+            ToolStripMenuItem importTxtMenuItem =
+                new ToolStripMenuItem();
+
+            importTxtMenuItem.Text =
+                "Import TXT...";
+
+            importTxtMenuItem.Click +=
+                ImportTxtMenuItem_Click;
+
+
+            fileMenuItem.DropDownItems.Add(
+                importTxtMenuItem);
+
+
+            ToolStripMenuItem helpMenuItem =
+         new ToolStripMenuItem();
+
+            helpMenuItem.Text =
+                "Help";
+
+
+            ToolStripMenuItem aboutMenuItem =
+                new ToolStripMenuItem();
+
+            aboutMenuItem.Text =
+                "About VyCapture";
+
+            aboutMenuItem.Click +=
+                AboutMenuItem_Click;
+
+
+            helpMenuItem.DropDownItems.Add(
+                aboutMenuItem);
+
+
+            menuStrip.Items.Add(
+                fileMenuItem);
+
+            menuStrip.Items.Add(
+                helpMenuItem);
+
+
+            MainMenuStrip =
+                menuStrip;
+
+
+            Controls.Add(
+                menuStrip);
+
+            menuStrip.BringToFront();
+        }
+
+
+        private void AboutMenuItem_Click(
+    object? sender,
+    EventArgs e)
+        {
+            AboutForm aboutForm =
+                new AboutForm();
+
+            try
+            {
+                aboutForm.ShowDialog(
+                    this);
+            }
+            finally
+            {
+                aboutForm.Dispose();
+            }
+        }
+
+        private void ImportTxtMenuItem_Click(
+       object? sender,
+       EventArgs e)
+        {
+            ImportForm importForm =
+                new ImportForm(
+                    _repository);
+
+            try
+            {
+                DialogResult result =
+                    importForm.ShowDialog(
+                        this);
+
+
+                if (result != DialogResult.OK)
+                {
+                    return;
+                }
+
+
+                LoadCaptures();
+
+                ApplySearch();
+
+
+                _statusLabel.Text =
+                    "Imported " +
+                    importForm.ImportedCount.ToString() +
+                    " files";
+            }
+            finally
+            {
+                importForm.Dispose();
+            }
+        }
+
 
         private void SetInitialWindowSize()
         {
@@ -622,7 +750,7 @@ namespace Viadivy.Tools.VyCapture
 
                 MessageBox.Show(
                     this,
-                    "文字無法儲存到桌面。",
+                    "Unable to save the text file to the desktop.",
                     "VyCapture",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -915,6 +1043,9 @@ namespace Viadivy.Tools.VyCapture
             else
             {
                 _txtPreview.Clear();
+
+                _previewGroup.Text =
+                    "Preview";
             }
 
 
